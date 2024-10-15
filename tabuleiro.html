@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <script src="script.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Juventude</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        #telaInicial, #areaJogo {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        #telaInicial {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        #telaInicial h1 {
+            font-size: 48px;
+            color: #4a4a4a;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        #telaInicial label, #telaInicial input, #telaInicial button {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        #telaInicial button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #telaInicial button:hover {
+            background-color: #45a049;
+        }
+        #canvasContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 5px;
+        }
+        #jogadoresInputs {
+            display: none;
+        }
+        #areaJogo {
+            display: none;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #tabuleiro {
+            max-width: 85%;
+            max-height: 85%;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        #rankJogadores {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+            overflow-y: auto;
+            max-height: 25vh;
+        }
+        #rankJogadores h2 {
+            font-size: 24px;
+            color: #4a4a4a;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid #4a4a4a;
+            padding-bottom: 10px;
+        }
+        #listaJogadores {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 0;
+            margin: 0;
+        }
+        #listaJogadores li {
+            flex: 1 1 200px;
+            margin: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+        #listaJogadores li:hover {
+            background-color: #e0e0e0;
+        }
+        #dado {
+            font-size: 48px;
+            cursor: pointer;
+            user-select: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        #iniciarJogoBtn, #desafioModal {
+            display: none;
+        }
+        #desafioModal {
+            position: fixed;
+            top: 50%;
+            left: center;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+            z-index: 1000;
+        }
+        #micoModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: center;
+            transform: translate(-50%, -50%);
+            background-color: #ffcccc;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+            z-index: 1000;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .popup-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .popup-content h2 {
+            color: #4a4a4a;
+            margin-bottom: 15px;
+        }
+
+        .popup-content h3 {
+            color: #4a4a4a;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .popup-content p, .popup-content li {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .popup-content ul, .popup-content ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        #entendiBotao {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 20px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #entendiBotao:hover {
+        background-color: #45a049;
+    }
+
+    @keyframes slideBorder {
+        0% {
+            background-position: 0% 50%;
+        }
+        100% {
+            background-position: 200% 50%;
+        }
+    }
+
+    #developedBy {
+        top: 0;
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 14px;
+        z-index: 1000;
+        text-align: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #developedBy::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(90deg, #ff0000, #00ff00, #0000ff, #ff0000);
+        background-size: 200% 100%;
+        border-radius: 11px;
+        z-index: -1;
+        animation: slideBorder 6s linear infinite;
+    }
+
+    #developedBy::after {
+        content: '';
+        position: absolute;
+        top: 1px;
+        left: 1px;
+        right: 1px;
+        bottom: 1px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 9px;
+        z-index: -1;
+    }
+
+    #developedBy:hover {
+        background-color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    #developedBy h4 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 18px;
+    }
+
+    #developedBy p {
+        font-weight: bold;
+        font-size: 13px;
+        margin: 5px 0;
+        color: #292828;
+    }
+
+        @media (min-width: 768px) {
+
+            #tabuleiro {
+                max-width: 70%;
+                max-height: 85vh;
+            }
+
+            #rankJogadores {
+                width: 25%;
+                margin-top: 0;
+                margin-left: 20px;
+                max-height: 85vh;
+            }
+
+            #listaJogadores {
+                flex-direction: column;
+            }
+
+            #listaJogadores li {
+                flex: 0 0 auto;
+            }
+        }
+
+        #jogadorVezPopup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 1000;
+        }
+
+        #resultadoModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+            z-index: 1000;
+            text-align: center;
+            max-width: 80%;
+            width: 300px;
+        }
+
+        #resultadoModal h3 {
+            margin-top: 0;
+            color: #4a4a4a;
+        }
+
+        #resultadoModal p {
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        #resultadoModal button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        #resultadoModal button:hover {
+            background-color: #45a049;
+        }
+
+        #vencedorModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+
+        #vencedorConteudo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }
+
+        #vencedorNome {
+            font-size: 64px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #vencedorMensagem {
+            font-size: 36px;
+            margin-bottom: 40px;
+        }
+
+        #novoJogoBtn {
+            font-size: 24px;
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #novoJogoBtn:hover {
+            background-color: #45a049;
+        }
+
+        #entendiBotao {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #entendiBotao:hover {
+            background-color: #45a049;
+        }
+
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999; /* Abaixo do modal do vencedor */
+        }
+
+        #vencedorModal {
+            z-index: 1000; /* Acima do canvas de confetes */
+        }
+    </style>
+</head>
+<body>
+    <div id="canvasContainer">
+        <canvas id="backgroundCanvas"></canvas>
+    </div>
+    <div id="telaInicial">
+        <h1>Jogo da Juventude</h1>
+        <label for="numJogadores">Número de jogadores (2-6):</label>
+        <input type="number" id="numJogadores" min="2" max="6" value="2">
+        <button onclick="mostrarInputsJogadores()">Confirmar</button>
+        <div id="jogadoresInputs"></div>
+        <button id="iniciarJogoBtn" onclick="iniciarJogo()">Iniciar Jogo</button>
+        
+    </div>
+    <div id="areaJogo">
+        <canvas id="tabuleiro"></canvas>
+        <div id="rankJogadores">
+            <h2>Jogadores</h2>
+            <ul id="listaJogadores"></ul>
+        </div>
+    </div>
+    <div id="jogadorVezPopup"></div>
+    <div id="desafioModal">
+        <h3 id="desafioTitulo"></h3>
+        <p id="desafioDescricao"></p>
+        <button onclick="aceitarDesafio()">Aceitar</button>
+        <button onclick="recusarDesafio()">Recusar</button>
+    </div>
+    <div id="micoModal">
+        <h3>Desafio de Mico!</h3>
+        <p id="micoDescricao"></p>
+        <button onclick="aceitarMico()">Aceitar Mico</button>
+        <button onclick="recusarMico()">Recusar Mico</button>
+    </div>
+    <div id="resultadoModal">
+        <h3 id="resultadoTitulo"></h3>
+        <p id="resultadoMensagem"></p>
+        <button onclick="fecharResultadoModal()">OK</button>
+    </div>
+    <div id="vencedorModal">
+        <div id="vencedorConteudo">
+            <div id="vencedorNome"></div>
+            <div id="vencedorMensagem">é o grande vencedor(a)!</div>
+            <button id="novoJogoBtn">Novo Jogo</button>
+        </div>
+    </div>
+    <div id="explicacaoPopup" class="popup">
+        <div class="popup-content">
+            <h2>Bem-vindo ao Jogo da Juventude!</h2>
+            <p>Este é um jogo de tabuleiro educativo que simula os desafios e oportunidades da juventude.</p>
+            <h3>Como jogar:</h3>
+            <ol>
+                <li>Escolha o número de jogadores (2-6).</li>
+                <li>Cada jogador lança o dado na sua vez.</li>
+                <li>Enfrente desafios para ganhar pontos.</li>
+                <li>Acumule pontos respondendo perguntas e superando desafios.</li>
+                <li>O primeiro jogador a chegar ao final do tabuleiro e acumular mais pontos vence!</li>
+            </ol>
+            <h3>Tipos de casas:</h3>
+            <ul>
+                <li><strong>Casas normais:</strong> Responda a uma pergunta sobre juventude e cidadania.</li>
+                <li><strong>Casas de desafio:</strong> Enfrente um desafio especial para ganhar mais pontos.</li>
+            </ul>
+            <p>Divirta-se e aprenda sobre os desafios e oportunidades da juventude!</p>
+            <button id="entendiBotao">Entendi</button>
+            
+            <div id="developedBy">
+                <h4>Desenvolvido por:</h4>
+                <p>Vitor Gabriel Simões</p>
+                <p>Guilherme Carvalho</p>
+                <p>Yago Ávila</p>
+            </div>
+        </div>
+    </div>
+    <canvas id="confettiCanvas"></canvas>
+    <script>
+        const telaInicial = document.getElementById('telaInicial');
+        const areaJogo = document.getElementById('areaJogo');
+        const jogadoresInputs = document.getElementById('jogadoresInputs');
+        const btnIniciarJogo = document.getElementById('btnIniciarJogo');
+        const canvas = document.getElementById('tabuleiro');
+        const ctx = canvas.getContext('2d');
+        const listaJogadores = document.getElementById('listaJogadores');
+
+        let jogadores = [];
+        let jogadoresFinalizados = [];
+
+        const casas = [
+            { nome: 'Início', cor: '#FFFFFF', desafio: 'Bem-vindo ao jogo! Você está pronto para começar sua jornada?', pontos: 1, consequencia: 'Você perde 0 pontos por ansiedade.' },
+            { nome: 'Trabalho', cor: '#FF0000', desafio: 'Você recebeu uma oferta de emprego em uma startup promissora. Aceita o desafio?', pontos: 3, consequencia: 'Você perde 1 ponto por estresse.' },
+            { nome: 'Educação', cor: '#00FF00', desafio: 'Uma oportunidade de bolsa de estudos no exterior surgiu. Você aceita?', pontos: 4, consequencia: 'Você perde 2 pontos por saudades de casa.' },
+            { nome: 'Família', cor: '#0000FF', desafio: 'Seus pais precisam de ajuda financeira. Você decide ajudá-los?', pontos: 2, consequencia: 'Você perde 1 ponto por aperto no orçamento.' },
+            { nome: 'Sexualidade', cor: '#FFFF00', desafio: 'Você tem a chance de participar de um workshop sobre educação sexual. Aceita?', pontos: 2, consequencia: 'Você perde 1 ponto por constrangimento inicial.' },
+            { nome: 'Lazer', cor: '#FF00FF', desafio: 'Seus amigos te convidam para uma viagem de fim de semana. Você vai?', pontos: 2, consequencia: 'Você perde 1 ponto por cansaço.' },
+            { nome: 'Participação Política', cor: '#00FFFF', desafio: 'Há uma manifestação pacífica na sua cidade. Você participa?', pontos: 3, consequencia: 'Você perde 1 ponto por exposição a conflitos.' },
+            { nome: 'Saúde', cor: '#FFA500', desafio: 'Você tem a oportunidade de começar uma nova dieta e rotina de exercícios. Aceita o desafio?', pontos: 3, consequencia: 'Você perde 1 ponto por dores musculares.' },
+            { nome: 'Tecnologia', cor: '#4B0082', desafio: 'Um curso de programação gratuito está disponível online. Você se inscreve?', pontos: 3, consequencia: 'Você perde 1 ponto por passar muito tempo no computador.' },
+            { nome: 'Mico 1', cor: '#FF1493', desafio: 'MICO: Dance a macarena na frente de todos por 30 segundos!', pontos: 5, isMico: true },
+            { nome: 'Meio Ambiente', cor: '#32CD32', desafio: 'Você é convidado a participar de uma ação de limpeza de praia. Aceita?', pontos: 2, consequencia: 'Você perde 1 ponto por cansaço físico.' },
+            { nome: 'Cultura', cor: '#8B4513', desafio: 'Um festival de cinema independente está acontecendo na sua cidade. Você vai?', pontos: 2, consequencia: 'Você perde 1 ponto por perder uma noite de sono.' },
+            { nome: 'Empreendedorismo', cor: '#FF6347', desafio: 'Você tem uma ideia para um negócio. Decide investir suas economias nele?', pontos: 4, consequencia: 'Você perde 2 pontos por estresse financeiro.' },
+            { nome: 'Voluntariado', cor: '#7CFC00', desafio: 'Uma ONG local precisa de voluntários. Você se oferece para ajudar?', pontos: 3, consequencia: 'Você perde 1 ponto por ter menos tempo livre.' },
+            { nome: 'Artes', cor: '#FF69B4', desafio: 'Você encontra um curso de pintura com desconto. Decide se matricular?', pontos: 2, consequencia: 'Você perde 1 ponto por frustração inicial.' },
+            { nome: 'Mico 2', cor: '#800080', desafio: 'MICO: Imite um animal escolhido pelos outros jogadores por 1 minuto!', pontos: 5, isMico: true },
+            { nome: 'Ciência', cor: '#1E90FF', desafio: 'Uma feira de ciências local está recrutando projetos. Você participa?', pontos: 3, consequencia: 'Você perde 1 ponto por noites mal dormidas.' },
+            { nome: 'Economia', cor: '#E6E6FA', desafio: 'Você tem a chance de investir em ações pela primeira vez. Aceita o risco?', pontos: 3, consequencia: 'Você perde 1 ponto por ansiedade financeira.' },
+            { nome: 'Comunicação', cor: '#8B0000', desafio: 'Um curso de oratória está disponível. Você se inscreve para melhorar suas habilidades de fala?', pontos: 2, consequencia: 'Você perde 1 ponto por nervosismo inicial.' },
+            { nome: 'Esporte', cor: '#FFC0CB', desafio: 'Um novo esporte está fazendo sucesso. Você tenta aprender?', pontos: 2, consequencia: 'Você perde 1 ponto por dores musculares.' },
+            { nome: 'Religião', cor: '#9932CC', desafio: 'Você é convidado a participar de um retiro espiritual. Aceita?', pontos: 2, consequencia: 'Você perde 1 ponto por conflitos internos.' },
+            { nome: 'Mico 3', cor: '#008080', desafio: 'MICO: Cante o refrão da sua música favorita em voz alta!', pontos: 5, isMico: true },
+            { nome: 'Segurança', cor: '#8FBC8F', desafio: 'Você tem a oportunidade de fazer um curso de autodefesa. Participa?', pontos: 2, consequencia: 'Você perde 1 ponto por hematomas.' },
+            { nome: 'Transporte', cor: '#4682B4', desafio: 'Você considera trocar o carro por uma bicicleta para ir ao trabalho. Tenta por um mês?', pontos: 3, consequencia: 'Você perde 1 ponto por cansaço físico.' },
+            { nome: 'Turismo', cor: '#FFD700', desafio: 'Surge uma promoção de viagem para um destino exótico. Você aproveita?', pontos: 3, consequencia: 'Você perde 1 ponto por jet lag.' },
+            { nome: 'Comunicação Social', cor: '#DEB887', desafio: 'Você é convidado a dar uma entrevista para um jornal local. Aceita?', pontos: 2, consequencia: 'Você perde 1 ponto por nervosismo.' },
+            { nome: 'Inovação', cor: '#4B0082', desafio: 'Uma competição de startups está acontecendo. Você inscreve sua ideia?', pontos: 4, consequencia: 'Você perde 2 pontos por noites sem dormir.' },
+            { nome: 'Cidadania Digital', cor: '#00CED1', desafio: 'Você descobre um curso online sobre segurança na internet. Faz o curso?', pontos: 2, consequencia: 'Você perde 1 ponto por paranoia digital temporária.' },
+            { nome: 'Empatia', cor: '#FF8C00', desafio: 'Um amigo está passando por um momento difícil. Você dedica um dia inteiro para apoiá-lo?', pontos: 3, consequencia: 'Você perde 1 ponto por exaustão emocional.' },
+            { nome: 'Liderança', cor: '#8B4513', desafio: 'Surge a oportunidade de liderar um projeto importante no trabalho. Você aceita?', pontos: 4, consequencia: 'Você perde 2 pontos por pressão adicional.' },
+            { nome: 'Finanças Pessoais', cor: '#2F4F4F', desafio: 'Você considera contratar um consultor financeiro para melhorar suas finanças. Faz isso?', pontos: 3, consequencia: 'Você perde 1 ponto por cortes no orçamento.' },
+            { nome: 'Networking', cor: '#BA55D3', desafio: 'Um evento de networking importante está acontecendo na sua área. Você participa?', pontos: 3, consequencia: 'Você perde 1 ponto por ansiedade social.' },
+            { nome: 'Bem-estar Mental', cor: '#98FB98', desafio: 'Você considera começar terapia para melhorar sua saúde mental. Marca a primeira sessão?', pontos: 3, consequencia: 'Você perde 1 ponto por confrontar questões difíceis.' },
+            { nome: 'Ativismo', cor: '#DC143C', desafio: 'Uma causa importante precisa de apoio. Você se torna um ativista para essa causa?', pontos: 3, consequencia: 'Você perde 1 ponto por burnout.' },
+            { nome: 'Sustentabilidade', cor: '#32CD32', desafio: 'Você considera adotar um estilo de vida zero waste. Tenta por um mês?', pontos: 3, consequencia: 'Você perde 1 ponto por inconveniências iniciais.' },
+            { nome: 'Diversidade', cor: '#FF1493', desafio: 'Um workshop sobre diversidade e inclusão está disponível no seu trabalho. Você participa?', pontos: 2, consequencia: 'Você perde 1 ponto por confrontar preconceitos internos.' },
+            { nome: 'Gestão do Tempo', cor: '#4682B4', desafio: 'Você decide implementar uma nova técnica de gestão do tempo. Tenta por duas semanas?', pontos: 3, consequencia: 'Você perde 1 ponto por rigidez inicial.' },
+            { nome: 'Autoconhecimento', cor: '#9932CC', desafio: 'Um retiro de meditação de fim de semana está disponível. Você participa?', pontos: 3, consequencia: 'Você perde 1 ponto por desconforto inicial.' },
+            { nome: 'Relações Interpessoais', cor: '#FF69B4', desafio: 'Você decide melhorar um relacionamento difícil na sua vida. Dá o primeiro passo?', pontos: 3, consequencia: 'Você perde 1 ponto por vulnerabilidade emocional.' },
+            { nome: 'Fim', cor: '#FFD700', desafio: 'Parabéns por chegar ao fim!', pontos: 5, consequencia: 'Você não perde pontos.' }
+        ];
+
+        const coresPioes = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
+        let jogadorAtual = 0;
+        let posicoesJogadores = [];
+
+        let jogoIniciado = false;
+        let pontuacaoJogadores = [];
+
+        let dadoGirando = false;
+        let resultadoDado = 0;
+
+        let confetesAnimacao;
+        let confetesAtivos = false;
+
+        function desenharDado(numero) {
+            const centroX = canvas.width / 2;
+            const centroY = canvas.height / 2;
+            const tamanhoLado = Math.min(canvas.width, canvas.height) / 10;
+
+            ctx.save();
+            ctx.translate(centroX, centroY);
+            ctx.rotate(Math.random() * Math.PI * 2);
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(-tamanhoLado/2, -tamanhoLado/2, tamanhoLado, tamanhoLado);
+            ctx.strokeStyle = 'black';
+            ctx.strokeRect(-tamanhoLado/2, -tamanhoLado/2, tamanhoLado, tamanhoLado);
+
+            ctx.fillStyle = 'black';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `${tamanhoLado/2}px Arial`;
+
+            switch(numero) {
+                case 1:
+                    ctx.fillText('', 0, 0);
+                    break;
+                case 2:
+                    ctx.fillText('•', -tamanhoLado/4, -tamanhoLado/4);
+                    ctx.fillText('•', tamanhoLado/4, tamanhoLado/4);
+                    break;
+                case 3:
+                    ctx.fillText('•', -tamanhoLado/4, -tamanhoLado/4);
+                    ctx.fillText('•', 0, 0);
+                    ctx.fillText('•', tamanhoLado/4, tamanhoLado/4);
+                    break;
+                case 4:
+                    ctx.fillText('•', -tamanhoLado/4, -tamanhoLado/4);
+                    ctx.fillText('•', -tamanhoLado/4, tamanhoLado/4);
+                    ctx.fillText('•', tamanhoLado/4, -tamanhoLado/4);
+                    ctx.fillText('•', tamanhoLado/4, tamanhoLado/4);
+                    break;
+                case 5:
+                    ctx.fillText('•', -tamanhoLado/4, -tamanhoLado/4);
+                    ctx.fillText('•', -tamanhoLado/4, tamanhoLado/4);
+                    ctx.fillText('•', 0, 0);
+                    ctx.fillText('•', tamanhoLado/4, -tamanhoLado/4);
+                    ctx.fillText('•', tamanhoLado/4, tamanhoLado/4);
+                    break;
+                case 6:
+                    ctx.fillText('•', -tamanhoLado/4, -tamanhoLado/4);
+                    ctx.fillText('•', -tamanhoLado/4, 0);
+                    ctx.fillText('•', -tamanhoLado/4, tamanhoLado/4);
+                    ctx.fillText('•', tamanhoLado/4, -tamanhoLado/4);
+                    ctx.fillText('•', tamanhoLado/4, 0);
+                    ctx.fillText('•', tamanhoLado/4, tamanhoLado/4);
+                    break;
+            }
+
+            ctx.restore();
+        }
+
+        function animarDado() {
+            if (!dadoGirando) return;
+
+            desenharTabuleiro();
+            desenharDado(Math.floor(Math.random() * 6) + 1);
+
+            requestAnimationFrame(animarDado);
+        }
+
+        function jogarDado() {
+            if (!jogoIniciado || dadoGirando || jogadoresFinalizados.includes(jogadorAtual)) return;
+
+            dadoGirando = true;
+            animarDado();
+
+            setTimeout(() => {
+                dadoGirando = false;
+                resultadoDado = Math.floor(Math.random() * 6) + 1;
+                mostrarResultadoDado();
+            }, 2000);
+        }
+
+        function mostrarResultadoDado() {
+            desenharTabuleiro();
+            desenharDado(resultadoDado);
+
+            setTimeout(() => {
+                moverJogador();
+            }, 1000);
+        }
+
+        function moverJogador() {
+            let novaPos = posicoesJogadores[jogadorAtual] + resultadoDado;
+            if (novaPos >= casas.length - 1) {
+                novaPos = casas.length - 1;
+                if (!jogadoresFinalizados.includes(jogadorAtual)) {
+                    jogadoresFinalizados.push(jogadorAtual);
+                    mostrarResultado('Fim do Jogo', `${jogadores[jogadorAtual]} chegou ao fim!`);
+                }
+            }
+            posicoesJogadores[jogadorAtual] = novaPos;
+            const casaAtual = casas[posicoesJogadores[jogadorAtual]];
+            
+            desenharTabuleiro();
+
+            if (jogadoresFinalizados.includes(jogadorAtual)) {
+                finalizarTurno();
+            } else {
+                setTimeout(() => {
+                    if (casaAtual.isMico) {
+                        apresentarMico(casaAtual);
+                    } else {
+                        apresentarDesafio(casaAtual);
+                    }
+                }, 1000);
+            }
+
+            verificarFimDeJogo();
+        }
+
+        function apresentarDesafio(casa) {
+            const desafioModal = document.getElementById('desafioModal');
+            document.getElementById('desafioTitulo').textContent = casa.nome;
+            document.getElementById('desafioDescricao').textContent = casa.desafio;
+            desafioModal.style.display = 'block';
+            
+            // Centralizar o modal em relação ao tabuleiro
+            const tabuleiro = document.getElementById('tabuleiro');
+            const tabuleiroRect = tabuleiro.getBoundingClientRect();
+            desafioModal.style.top = `${tabuleiroRect.top + tabuleiroRect.height / 2}px`;
+            desafioModal.style.left = `${tabuleiroRect.left + tabuleiroRect.width / 2}px`;
+        }
+
+        function mostrarInputsJogadores() {
+            const numJogadores = parseInt(document.getElementById('numJogadores').value);
+            if (numJogadores < 2 || numJogadores > 6) {
+                alert('Por favor, escolha entre 2 e 6 jogadores.');
+                return;
+            }
+
+            jogadoresInputs.innerHTML = '';
+            for (let i = 1; i <= numJogadores; i++) {
+                jogadoresInputs.innerHTML += `
+                    <input type="text" id="jogador${i}" placeholder="Nome do Jogador ${i}">
+                `;
+            }
+            jogadoresInputs.style.display = 'block';
+            document.getElementById('iniciarJogoBtn').style.display = 'inline-block';
+        }
+
+        function iniciarJogo() {
+            jogadores = [];
+            const inputs = jogadoresInputs.getElementsByTagName('input');
+            for (let input of inputs) {
+                if (input.value.trim() === '') {
+                    alert('Por favor, preencha todos os nomes dos jogadores.');
+                    return;
+                }
+                jogadores.push(input.value.trim());
+            }
+
+            posicoesJogadores = new Array(jogadores.length).fill(0);
+
+            telaInicial.style.display = 'none';
+            areaJogo.style.display = 'flex';
+            document.getElementById('developedBy').style.display = 'none'; // Esconde o "Developed By"
+            atualizarRankJogadores();
+            ajustarTamanhoCanvas();
+            jogoIniciado = true;
+            pontuacaoJogadores = new Array(jogadores.length).fill(0);
+            desenharTabuleiro();
+            mostrarJogadorVez(); // Adicione esta linha
+        }
+
+        function ajustarTamanhoCanvas() {
+            const areaJogoRect = areaJogo.getBoundingClientRect();
+            const tamanhoMaximo = Math.min(areaJogoRect.width * 0.85, areaJogoRect.height * 0.85);
+            canvas.width = tamanhoMaximo;
+            canvas.height = tamanhoMaximo;
+            desenharTabuleiro();
+        }
+
+        function desenharTabuleiro() {
+            const numCasasLado = 11;
+            const numCasasTopo = 11;
+            const tamanhoLado = Math.min(canvas.width / (numCasasLado + 1), canvas.height / (numCasasTopo + 1));
+            const margemX = (canvas.width - (numCasasLado * tamanhoLado)) / 2;
+            const margemY = (canvas.height - (numCasasTopo * tamanhoLado)) / 2;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Certifique-se de que o canvas está visível
+            canvas.style.display = 'block';
+
+            // Desenhar casas
+            casas.forEach((casa, index) => {
+                let x, y;
+
+                if (index < numCasasTopo) {
+                    // Lado superior
+                    x = margemX + index * tamanhoLado;
+                    y = margemY;
+                } else if (index < numCasasTopo + numCasasLado - 1) {
+                    // Lado direito
+                    x = margemX + (numCasasTopo - 1) * tamanhoLado;
+                    y = margemY + (index - numCasasTopo + 1) * tamanhoLado;
+                } else if (index < numCasasTopo * 2 + numCasasLado - 2) {
+                    // Lado inferior
+                    x = margemX + (numCasasTopo * 2 + numCasasLado - 3 - index) * tamanhoLado;
+                    y = margemY + (numCasasTopo - 1) * tamanhoLado;
+                } else {
+                    // Lado esquerdo
+                    x = margemX;
+                    y = margemY + (numCasasTopo * 2 + numCasasLado * 2 - 4 - index) * tamanhoLado;
+                }
+
+                ctx.fillStyle = casa.cor;
+                ctx.fillRect(x, y, tamanhoLado, tamanhoLado);
+                ctx.strokeRect(x, y, tamanhoLado, tamanhoLado);
+
+                // Configuração inicial da fonte
+                let tamanhoFonte = tamanhoLado / 6;
+                ctx.font = `bold ${tamanhoFonte}px Arial`;
+                ctx.fillStyle = 'black';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // Quebrar o nome em várias linhas
+                const palavras = casa.nome.split(' ');
+                let linhas = [];
+                let linhaAtual = '';
+
+                palavras.forEach(palavra => {
+                    if (ctx.measureText(linhaAtual + ' ' + palavra).width <= tamanhoLado - 10) {
+                        linhaAtual += (linhaAtual ? ' ' : '') + palavra;
+                    } else {
+                        if (linhaAtual) linhas.push(linhaAtual);
+                        linhaAtual = palavra;
+                    }
+                });
+                if (linhaAtual) linhas.push(linhaAtual);
+
+                // Reduzir o tamanho da fonte se necessário
+                while (linhas.length * tamanhoFonte > tamanhoLado * 0.8) {
+                    tamanhoFonte *= 0.9;
+                    ctx.font = `bold ${tamanhoFonte}px Arial`;
+                    linhas = [];
+                    linhaAtual = '';
+                    palavras.forEach(palavra => {
+                        if (ctx.measureText(linhaAtual + ' ' + palavra).width <= tamanhoLado - 10) {
+                            linhaAtual += (linhaAtual ? ' ' : '') + palavra;
+                        } else {
+                            if (linhaAtual) linhas.push(linhaAtual);
+                            linhaAtual = palavra;
+                        }
+                    });
+                    if (linhaAtual) linhas.push(linhaAtual);
+                }
+
+                // Desenhar o texto
+                linhas.forEach((linha, i) => {
+                    const y_offset = (i - (linhas.length - 1) / 2) * tamanhoFonte;
+                    ctx.fillText(linha, x + tamanhoLado / 2, y + tamanhoLado / 2 + y_offset);
+                });
+
+                // Número da casa
+                ctx.font = `bold ${tamanhoLado / 5}px Arial`;
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(index + 1, x + 5, y + tamanhoLado - 5);
+            });
+
+            // Desenhar piões
+            const pioesNaCasa = new Array(casas.length).fill(0);
+            jogadores.forEach((jogador, index) => {
+                pioesNaCasa[posicoesJogadores[index]]++;
+            });
+
+            jogadores.forEach((jogador, index) => {
+                const posicao = posicoesJogadores[index];
+                let x, y;
+
+                if (posicao < numCasasTopo) {
+                    x = margemX + posicao * tamanhoLado;
+                    y = margemY;
+                } else if (posicao < numCasasTopo + numCasasLado - 1) {
+                    x = margemX + (numCasasTopo - 1) * tamanhoLado;
+                    y = margemY + (posicao - numCasasTopo + 1) * tamanhoLado;
+                } else if (posicao < numCasasTopo * 2 + numCasasLado - 2) {
+                    x = margemX + (numCasasTopo * 2 + numCasasLado - 3 - posicao) * tamanhoLado;
+                    y = margemY + (numCasasTopo - 1) * tamanhoLado;
+                } else {
+                    x = margemX;
+                    y = margemY + (numCasasTopo * 2 + numCasasLado * 2 - 4 - posicao) * tamanhoLado;
+                }
+
+                const numPioesNaCasa = pioesNaCasa[posicao];
+                const raio = tamanhoLado / 6;
+                const angulo = (2 * Math.PI / numPioesNaCasa) * (pioesNaCasa[posicao] - 1);
+                const offsetX = numPioesNaCasa > 1 ? Math.cos(angulo) * raio : 0;
+                const offsetY = numPioesNaCasa > 1 ? Math.sin(angulo) * raio : 0;
+
+                ctx.beginPath();
+                ctx.arc(x + tamanhoLado / 2 + offsetX, y + tamanhoLado / 2 + offsetY, raio, 0, 2 * Math.PI);
+                ctx.fillStyle = coresPioes[index];
+                ctx.fill();
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                pioesNaCasa[posicao]--;
+            });
+
+            // Desenhar dado
+            const centroX = canvas.width / 2;
+            const centroY = canvas.height / 2;
+            ctx.font = `${tamanhoLado}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = 'black';
+            ctx.fillText('🎲', centroX, centroY);
+        }
+
+        function mostrarResultado(titulo, mensagem) {
+            const modal = document.getElementById('resultadoModal');
+            document.getElementById('resultadoTitulo').textContent = titulo;
+            document.getElementById('resultadoMensagem').textContent = mensagem;
+            modal.style.display = 'block';
+            
+            // Fechar os modais originais
+            document.getElementById('desafioModal').style.display = 'none';
+            document.getElementById('micoModal').style.display = 'none';
+        }
+
+        function fecharResultadoModal() {
+            document.getElementById('resultadoModal').style.display = 'none';
+            finalizarTurno();
+        }
+
+        function aceitarDesafio() {
+            const casaAtual = casas[posicoesJogadores[jogadorAtual]];
+            pontuacaoJogadores[jogadorAtual] += casaAtual.pontos;
+            mostrarResultado('Desafio Aceito', `Você ganhou ${casaAtual.pontos} pontos! ${casaAtual.consequencia}`);
+        }
+
+        function recusarDesafio() {
+            mostrarResultado('Desafio Recusado', "Você recusou o desafio. Nenhum ponto ganho ou perdido.");
+        }
+
+        function apresentarMico(casa) {
+            const micoModal = document.getElementById('micoModal');
+            document.getElementById('micoDescricao').textContent = casa.desafio;
+            micoModal.style.display = 'block';
+            
+            // Centralizar o modal em relação ao tabuleiro
+            const tabuleiro = document.getElementById('tabuleiro');
+            const tabuleiroRect = tabuleiro.getBoundingClientRect();
+            micoModal.style.top = `${tabuleiroRect.top + tabuleiroRect.height / 2}px`;
+            micoModal.style.left = `${tabuleiroRect.left + tabuleiroRect.width / 2}px`;
+        }
+
+        function aceitarMico() {
+            const casaAtual = casas[posicoesJogadores[jogadorAtual]];
+            pontuacaoJogadores[jogadorAtual] += casaAtual.pontos;
+            mostrarResultado('Mico Aceito', `Parabéns por aceitar o mico! Você ganhou ${casaAtual.pontos} pontos!`);
+        }
+
+        function recusarMico() {
+            pontuacaoJogadores[jogadorAtual] = 0;
+            posicoesJogadores[jogadorAtual] = 0;
+            mostrarResultado('Mico Recusado', "Você recusou o mico. Infelizmente, você perdeu todos os pontos e voltará para o início.");
+        }
+
+        function finalizarTurno() {
+            document.getElementById('desafioModal').style.display = 'none';
+            document.getElementById('micoModal').style.display = 'none';
+            document.getElementById('resultadoModal').style.display = 'none';
+            
+            do {
+                jogadorAtual = (jogadorAtual + 1) % jogadores.length;
+            } while (jogadoresFinalizados.includes(jogadorAtual) && jogadoresFinalizados.length < jogadores.length);
+
+            desenharTabuleiro();
+            atualizarRankJogadores();
+            verificarFimDeJogo();
+            mostrarJogadorVez();
+        }
+
+        function mostrarJogadorVez() {
+            const popup = document.getElementById('jogadorVezPopup');
+            popup.textContent = `Vez de ${jogadores[jogadorAtual]}`;
+            popup.style.opacity = '1';
+            
+            setTimeout(() => {
+                popup.style.opacity = '0';
+            }, 2000);
+        }
+
+        function atualizarRankJogadores() {
+            listaJogadores.innerHTML = '';
+            jogadores.forEach((jogador, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>${jogador}</strong><br>
+                    Casa: ${posicoesJogadores[index] + 1}<br>
+                    Pontos: ${pontuacaoJogadores[index] || 0}
+                `;
+                li.style.borderLeft = `5px solid ${coresPioes[index]}`;
+                if (index === jogadorAtual) {
+                    li.style.fontWeight = 'bold';
+                    li.style.backgroundColor = '#e6f3ff';
+                }
+                if (jogadoresFinalizados.includes(index)) {
+                    li.style.textDecoration = 'underline';
+                    li.innerHTML += ' (Finalizado)';
+                }
+                listaJogadores.appendChild(li);
+            });
+        }
+
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const centroX = canvas.width / 2;
+            const centroY = canvas.height / 2;
+            const tamanhoLado = Math.min(canvas.width, canvas.height) / 10;
+
+            if (Math.abs(x - centroX) < tamanhoLado / 2 && Math.abs(y - centroY) < tamanhoLado / 2) {
+                jogarDado();
+            }
+        });
+
+        // Adicione um evento de redimensionamento para o tabuleiro
+        window.addEventListener('resize', () => {
+            if (jogoIniciado) {
+                ajustarTamanhoCanvas();
+            }
+        });
+
+        function verificarFimDeJogo() {
+            if (jogadoresFinalizados.length === jogadores.length) {
+                const vencedor = jogadores[pontuacaoJogadores.indexOf(Math.max(...pontuacaoJogadores))];
+                mostrarVencedor(vencedor);
+            }
+        }
+
+        function mostrarVencedor(vencedor) {
+            const vencedorModal = document.getElementById('vencedorModal');
+            const vencedorNome = document.getElementById('vencedorNome');
+            
+            vencedorNome.textContent = vencedor;
+            vencedorModal.style.display = 'block';
+
+            soltarConfetes();
+
+            // Adicionar event listener para o botão "Novo Jogo"
+            const novoJogoBtn = document.getElementById('novoJogoBtn');
+            novoJogoBtn.addEventListener('click', pararConfetes);
+        }
+
+        function soltarConfetes() {
+            if (confetesAtivos) return;
+
+            confetesAtivos = true;
+            const confetes = [];
+            for (let i = 0; i < 200; i++) {
+                confetes.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: -20,
+                    size: Math.random() * 5 + 5,
+                    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                    speed: Math.random() * 5 + 1,
+                    angle: Math.random() * Math.PI * 2,
+                    rotation: Math.random() * 0.2 - 0.1,
+                    rotationSpeed: Math.random() * 0.01 - 0.005
+                });
+            }
+
+            function animarConfetes() {
+                if (!confetesAtivos) {
+                    confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+                    return;
+                }
+
+                confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+                confetes.forEach(confete => {
+                    confettiCtx.save();
+                    confettiCtx.translate(confete.x, confete.y);
+                    confettiCtx.rotate(confete.angle);
+                    confettiCtx.fillStyle = confete.color;
+                    confettiCtx.fillRect(-confete.size / 2, -confete.size / 2, confete.size, confete.size);
+                    confettiCtx.restore();
+
+                    confete.y += confete.speed;
+                    confete.x += Math.sin(confete.angle) * 0.5;
+                    confete.angle += confete.rotation;
+                    confete.rotation += confete.rotationSpeed;
+
+                    if (confete.y > confettiCanvas.height) {
+                        confete.y = -20;
+                        confete.x = Math.random() * confettiCanvas.width;
+                    }
+                });
+                confetesAnimacao = requestAnimationFrame(animarConfetes);
+            }
+
+            animarConfetes();
+        }
+
+        function pararConfetes() {
+            confetesAtivos = false;
+            if (confetesAnimacao) {
+                cancelAnimationFrame(confetesAnimacao);
+                confetesAnimacao = null;
+            }
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        }
+
+        function reiniciarJogo() {
+            console.log("Reiniciando jogo...");
+            
+            // Parar a animação de confetes
+            pararConfetes();
+
+            // Esconder o modal do vencedor
+            document.getElementById('vencedorModal').style.display = 'none';
+
+            // Limpar o canvas do jogo
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Resetar variáveis do jogo
+            jogoIniciado = false;
+            jogadores = [];
+            posicoesJogadores = [];
+            pontuacaoJogadores = [];
+            jogadorAtual = 0;
+            jogadoresFinalizados = [];
+            
+            // Limpar inputs e esconder botão de iniciar
+            document.getElementById('numJogadores').value = '';
+            document.getElementById('jogadoresInputs').innerHTML = '';
+            document.getElementById('iniciarJogoBtn').style.display = 'none';
+            
+            // Mostrar a tela inicial e esconder a área de jogo
+            document.getElementById('telaInicial').style.display = 'block';
+            document.getElementById('areaJogo').style.display = 'none';
+            
+            // Limpar o rank de jogadores
+            document.getElementById('listaJogadores').innerHTML = '';
+            
+            // Resetar o tabuleiro
+            desenharTabuleiro();
+
+            console.log("Jogo reiniciado.");
+        }
+
+        // Certifique-se de que esta função está sendo chamada quando o botão "Novo Jogo" é clicado
+        document.getElementById('novoJogoBtn').addEventListener('click', reiniciarJogo);
+
+        const backgroundCanvas = document.getElementById('backgroundCanvas');
+        const bgCtx = backgroundCanvas.getContext('2d');
+
+        let icones = [];
+
+        function ajustarTamanhoBackgroundCanvas() {
+            backgroundCanvas.width = window.innerWidth;
+            backgroundCanvas.height = window.innerHeight;
+            inicializarIcones();
+            desenharFundoTematico();
+        }
+
+        function inicializarIcones() {
+            const iconesDisponiveis = [
+                '📚', '💻', '🎨', '🏀', '🎵', '🌍', '🔬', '🎭', '📱', '🚲',
+                '🎓', '🏋️', '🎮', '🌱', '🎤', '📷', '🧠', '🤝', '💡', '✈️'
+            ];
+
+            icones = [];
+            for (let i = 0; i < 50; i++) {
+                icones.push({
+                    icone: iconesDisponiveis[Math.floor(Math.random() * iconesDisponiveis.length)],
+                    x: Math.random() * backgroundCanvas.width,
+                    y: Math.random() * backgroundCanvas.height,
+                    rotacao: Math.random() * Math.PI * 2,
+                    escala: 0.5 + Math.random() * 1.5,
+                    velocidadeRotacao: (Math.random() - 0.5) * 0.02,
+                    opacidade: 0.1 + Math.random() * 0.3
+                });
+            }
+        }
+
+        function desenharFundoTematico() {
+            bgCtx.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+
+            // Desenhar um gradiente de fundo
+            const gradient = bgCtx.createLinearGradient(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#4682B4');
+            bgCtx.fillStyle = gradient;
+            bgCtx.fillRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+
+            // Desenhar ícones temáticos
+            bgCtx.font = '24px Arial';
+            bgCtx.textAlign = 'center';
+            bgCtx.textBaseline = 'middle';
+
+            icones.forEach(icone => {
+                bgCtx.save();
+                bgCtx.translate(icone.x, icone.y);
+                bgCtx.rotate(icone.rotacao);
+                bgCtx.scale(icone.escala, icone.escala);
+                bgCtx.fillStyle = `rgba(255, 255, 255, ${icone.opacidade})`;
+                bgCtx.fillText(icone.icone, 0, 0);
+                bgCtx.restore();
+
+                // Atualizar rotação e opacidade
+                icone.rotacao += icone.velocidadeRotacao;
+                icone.opacidade = 0.1 + Math.abs(Math.sin(Date.now() * 0.001) * 0.3);
+            });
+
+            // Desenhar linhas de conexão
+            bgCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            bgCtx.lineWidth = 1;
+
+            for (let i = 0; i < 20; i++) {
+                bgCtx.beginPath();
+                bgCtx.moveTo(Math.random() * backgroundCanvas.width, Math.random() * backgroundCanvas.height);
+                bgCtx.lineTo(Math.random() * backgroundCanvas.width, Math.random() * backgroundCanvas.height);
+                bgCtx.stroke();
+            }
+
+            // Animar o fundo
+            requestAnimationFrame(desenharFundoTematico);
+        }
+
+        window.addEventListener('load', () => {
+            ajustarTamanhoBackgroundCanvas();
+        });
+
+        window.addEventListener('resize', ajustarTamanhoBackgroundCanvas);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const explicacaoPopup = document.getElementById('explicacaoPopup');
+            const entendiBotao = document.getElementById('entendiBotao');
+
+            // Mostrar o pop-up quando a página carregar
+            explicacaoPopup.style.display = 'block';
+
+            // Fechar o pop-up quando o botão "Entendi" for clicado
+            entendiBotao.addEventListener('click', function() {
+                explicacaoPopup.style.display = 'none';
+            });
+        });
+
+        const confettiCanvas = document.getElementById('confettiCanvas');
+        const confettiCtx = confettiCanvas.getContext('2d');
+
+        function ajustarTamanhoConfettiCanvas() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', ajustarTamanhoConfettiCanvas);
+        ajustarTamanhoConfettiCanvas();
+    </script>
+</body>
+</html>
